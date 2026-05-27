@@ -14,8 +14,12 @@ export default function PediatriciansPage() {
         </p>
       </div>
 
-      <SearchBar basePath="/pediatricians" />
-      <DoctorFilters />
+      <Suspense fallback={<div className="h-10" />}>
+        <SearchBar basePath="/pediatricians" />
+      </Suspense>
+      <Suspense fallback={<div className="h-32" />}>
+        <DoctorFilters />
+      </Suspense>
 
       <Suspense fallback={<Skeleton className="h-48" />}>
         <DoctorResults />

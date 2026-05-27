@@ -12,8 +12,12 @@ export default function UrgentPage() {
         <p className="text-zinc-600">Find walk-in clinics, ER wait times, and virtual care near you.</p>
       </div>
 
-      <SearchBar basePath="/urgent" />
-      <ClinicFilters />
+      <Suspense fallback={<div className="h-10" />}>
+        <SearchBar basePath="/urgent" />
+      </Suspense>
+      <Suspense fallback={<div className="h-8" />}>
+        <ClinicFilters />
+      </Suspense>
 
       <Suspense fallback={<Skeleton className="h-48" />}>
         <ClinicResults />
