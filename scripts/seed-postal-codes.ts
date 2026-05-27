@@ -1,9 +1,16 @@
 // Run with: npx tsx scripts/seed-postal-codes.ts [path/to/postal_codes.csv]
 // Downloads and seeds Ontario postal codes into the postal_codes table.
 
+import dotenv from "dotenv";
+dotenv.config({ path: ".env.local" });
+
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL!,
+});
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log("Seeding postal codes...");
