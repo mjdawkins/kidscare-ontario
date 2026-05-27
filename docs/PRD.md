@@ -37,7 +37,7 @@ KidsCare Ontario answers all three questions fast, in one place, on mobile.
 - Pediatricians verifying their own accepting status
 
 ### Geography
-- **v1 scope:** Greater Toronto Area (GTA) — Toronto, Peel, York, Durham, Halton
+- **v1 scope:** Greater Toronto Area (GTA) including **Milton** and Halton Region — Toronto, Peel, York, Durham, Halton
 - **Future:** Expand to Ottawa, Hamilton, London, then province-wide
 
 ---
