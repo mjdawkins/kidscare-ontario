@@ -5,7 +5,7 @@ generator client {
 
 datasource db {
   provider   = "postgresql"
-  extensions = [postgis(version: "3.4"), pgcrypto]
+  extensions = [postgis, pgcrypto]
 }
 
 enum DoctorType {

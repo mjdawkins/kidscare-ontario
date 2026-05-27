@@ -1,9 +1,14 @@
+import dotenv from "dotenv";
 import { defineConfig } from "prisma/config";
 
-const databaseUrl = process.env.DATABASE_URL;
+dotenv.config({ path: ".env.local" });
 
-if (!databaseUrl) {
-  throw new Error("DATABASE_URL environment variable is required");
+// prisma migrate uses this URL (needs session mode, no pgbouncer)
+// PrismaClient at runtime uses DATABASE_URL via @prisma/adapter-pg (pooler)
+const migrateUrl = process.env.DIRECT_URL;
+
+if (!migrateUrl) {
+  throw new Error("DIRECT_URL environment variable is required for migrations");
 }
 
 export default defineConfig({
@@ -12,6 +17,6 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: databaseUrl,
+    url: migrateUrl,
   },
 });
