@@ -1,15 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/cron/refresh-er-waits",
-      "schedule": "*/15 * * * *"
-    },
-    {
-      "path": "/api/cron/refresh-clinics",
-      "schedule": "0 3 * * *"
-    },
-    {
-      "path": "/api/cron/expire-verifications",
+      "path": "/api/cron/daily",
       "schedule": "0 4 * * *"
     }
   ]
