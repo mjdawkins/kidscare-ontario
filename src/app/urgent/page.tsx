@@ -158,30 +158,18 @@ async function searchClinics(lat: number, lng: number, params: SearchParams) {
     ...queryParams
   );
 
-  const now = new Date();
-  const today = now.getDay().toString();
-  const currentTime = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
-
-  return results.map((r) => {
-    const hours = r.hours as Record<string, { open: string; close: string }> | null;
-    let isOpen = false;
-    if (hours?.[today]) {
-      isOpen = hours[today].open <= currentTime && hours[today].close >= currentTime;
-    }
-    return {
-      id: r.id,
-      name: r.name,
-      address: r.address,
-      distance_km: r.distance_km,
-      phone: r.phone,
-      hours,
-      sees_children: r.sees_children,
-      open_saturday: r.open_saturday,
-      open_sunday: r.open_sunday,
-      open_after_6pm: r.open_after_6pm,
-      is_open_now: isOpen,
-    };
-  });
+  return results.map((r) => ({
+    id: r.id,
+    name: r.name,
+    address: r.address,
+    distance_km: r.distance_km,
+    phone: r.phone,
+    hours: r.hours as Record<string, { open: string; close: string }> | null,
+    sees_children: r.sees_children,
+    open_saturday: r.open_saturday,
+    open_sunday: r.open_sunday,
+    open_after_6pm: r.open_after_6pm,
+  }));
 }
 
 async function searchErWaits(lat: number, lng: number) {

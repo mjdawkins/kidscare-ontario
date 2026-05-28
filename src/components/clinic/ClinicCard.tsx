@@ -1,3 +1,6 @@
+"use client";
+
+import { useMemo } from "react";
 import { Card } from "@/components/ui/Card";
 import { OpenNowBadge } from "@/components/shared/OpenNowBadge";
 import { WeekendBadge } from "@/components/shared/WeekendBadge";
@@ -12,12 +15,14 @@ function formatTime(time: string): string {
   return m === 0 ? `${hour}${ampm}` : `${hour}:${m.toString().padStart(2, "0")}${ampm}`;
 }
 
-function todayHours(hours: Record<string, { open: string; close: string }> | null): string | null {
-  if (!hours) return null;
-  const today = new Date().getDay().toString();
+function isOpenNow(hours: Record<string, { open: string; close: string }> | null): boolean {
+  if (!hours) return false;
+  const now = new Date();
+  const today = now.getDay().toString();
+  const currentTime = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
   const todaySlot = hours[today];
-  if (!todaySlot) return null;
-  return `${formatTime(todaySlot.open)} – ${formatTime(todaySlot.close)}`;
+  if (!todaySlot) return false;
+  return todaySlot.open <= currentTime && todaySlot.close >= currentTime;
 }
 
 interface ClinicCardProps {
@@ -32,12 +37,19 @@ interface ClinicCardProps {
     open_saturday: boolean;
     open_sunday: boolean;
     open_after_6pm: boolean;
-    is_open_now: boolean;
   };
 }
 
 export function ClinicCard({ clinic }: ClinicCardProps) {
-  const hoursToday = todayHours(clinic.hours);
+  const open = useMemo(() => isOpenNow(clinic.hours), [clinic.hours]);
+  const hoursToday = useMemo(() => {
+    if (!clinic.hours) return null;
+    const today = new Date().getDay().toString();
+    const slot = clinic.hours[today];
+    if (!slot) return null;
+    return `${formatTime(slot.open)} – ${formatTime(slot.close)}`;
+  }, [clinic.hours]);
+
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(clinic.address)}`;
 
   return (
@@ -48,7 +60,7 @@ export function ClinicCard({ clinic }: ClinicCardProps) {
           <p className="text-sm text-zinc-600">{clinic.address}</p>
         </div>
         <div className="flex flex-col items-end gap-1 shrink-0">
-          <OpenNowBadge isOpen={clinic.is_open_now} />
+          <OpenNowBadge isOpen={open} />
           {clinic.sees_children && (
             <span className="text-xs text-green-700 font-medium">Sees children</span>
           )}

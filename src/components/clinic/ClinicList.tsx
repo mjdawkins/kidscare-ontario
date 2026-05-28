@@ -13,7 +13,6 @@ interface Clinic {
   open_saturday: boolean;
   open_sunday: boolean;
   open_after_6pm: boolean;
-  is_open_now: boolean;
 }
 
 interface ClinicListProps {
