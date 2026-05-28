@@ -85,8 +85,8 @@ async function main() {
     if (!lat || !lng) continue;
 
     await prisma.$executeRawUnsafe(
-      `INSERT INTO clinics (name, address, coords, phone, hours, open_saturday, open_sunday, open_after_6pm, google_place_id)
-       VALUES ($1, $2, ST_SetSRID(ST_MakePoint($3, $4), 4326), $5, $6::jsonb, $7, $8, $9, $10)
+      `INSERT INTO clinics (id, name, address, coords, phone, hours, open_saturday, open_sunday, open_after_6pm, google_place_id, created_at, updated_at)
+       VALUES (gen_random_uuid(), $1, $2, ST_SetSRID(ST_MakePoint($3, $4), 4326), $5, $6::jsonb, $7, $8, $9, $10, now(), now())
        ON CONFLICT DO NOTHING`,
       details.name ?? place.name,
       details.formatted_address ?? place.vicinity ?? "",
