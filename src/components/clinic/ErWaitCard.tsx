@@ -6,6 +6,7 @@ interface ErWaitProps {
   patientsInED: number;
   patientsWaiting: number;
   distanceKm: number;
+  isLive?: boolean;
 }
 
 function formatWait(minutes: number): string {
@@ -24,11 +25,11 @@ function waitColor(minutes: number): string {
   return "text-red-600";
 }
 
-export function ErWaitCard({ hospitalName, waitMinutes, patientsInED, patientsWaiting, distanceKm }: ErWaitProps) {
+export function ErWaitCard({ hospitalName, waitMinutes, patientsInED, patientsWaiting, distanceKm, isLive }: ErWaitProps) {
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(hospitalName + " Hospital, Ontario")}`;
 
   return (
-    <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+    <div className={`rounded-xl border p-4 ${isLive ? "border-red-200 bg-red-50" : "border-zinc-200 bg-white"}`}>
       <div className="flex items-start justify-between">
         <div>
           <h3 className="font-semibold text-zinc-900">{hospitalName}</h3>
@@ -38,13 +39,22 @@ export function ErWaitCard({ hospitalName, waitMinutes, patientsInED, patientsWa
           <p className={`text-lg font-bold ${waitColor(waitMinutes)}`}>
             {formatWait(waitMinutes)}
           </p>
-          <p className="text-xs text-zinc-500">estimated wait</p>
+          <div className="flex items-center gap-1 justify-end">
+            {isLive && (
+              <span className="text-xs font-medium text-green-700 bg-green-50 rounded-full px-1.5 py-0.5">Live</span>
+            )}
+            <p className="text-xs text-zinc-400">
+              {isLive ? "current" : "avg wait"}
+            </p>
+          </div>
         </div>
       </div>
-      <div className="mt-2 flex items-center gap-4 text-xs text-zinc-600">
-        <span>{patientsInED} in emergency dept</span>
-        {patientsWaiting > 0 && <span>{patientsWaiting} waiting</span>}
-      </div>
+      {patientsInED > 0 && (
+        <div className="mt-2 flex items-center gap-4 text-xs text-zinc-600">
+          <span>{patientsInED} in emergency dept</span>
+          {patientsWaiting > 0 && <span>{patientsWaiting} waiting</span>}
+        </div>
+      )}
       <div className="mt-2">
         <a
           href={directionsUrl}
