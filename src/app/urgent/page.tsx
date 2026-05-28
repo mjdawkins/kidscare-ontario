@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { SearchBar } from "@/components/layout/SearchBar";
 import { ClinicList } from "@/components/clinic/ClinicList";
 import { ClinicFilters } from "@/components/clinic/ClinicFilters";
+import { ErWaitList } from "@/components/clinic/ErWaitCard";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { prisma } from "@/lib/db/prisma";
 import { postalCodeToCoords } from "@/lib/geo";
@@ -70,19 +71,25 @@ async function ClinicResults({ params }: { params: SearchParams }) {
     );
   }
 
-  const clinics = await searchClinics(lat, lng, params);
+  const [clinics, erWaits] = await Promise.all([
+    searchClinics(lat, lng, params),
+    searchErWaits(lat, lng),
+  ]);
 
-  if (clinics.length === 0) {
-    return (
-      <p className="py-12 text-center text-zinc-500">
-        No clinics found within {SEARCH_RADIUS_KM}km of your location.
-        <br />
-        <span className="text-xs">({lat.toFixed(4)}, {lng.toFixed(4)})</span>
-      </p>
-    );
-  }
-
-  return <ClinicList clinics={clinics} />;
+  return (
+    <div className="space-y-6">
+      {erWaits.length > 0 && <ErWaitList erWaits={erWaits} />}
+      {clinics.length > 0 ? (
+        <ClinicList clinics={clinics} />
+      ) : (
+        <p className="py-12 text-center text-zinc-500">
+          No clinics found within {SEARCH_RADIUS_KM}km of your location.
+          <br />
+          <span className="text-xs">({lat.toFixed(4)}, {lng.toFixed(4)})</span>
+        </p>
+      )}
+    </div>
+  );
 }
 
 async function searchClinics(lat: number, lng: number, params: SearchParams) {
@@ -175,4 +182,37 @@ async function searchClinics(lat: number, lng: number, params: SearchParams) {
       is_open_now: isOpen,
     };
   });
+}
+
+async function searchErWaits(lat: number, lng: number) {
+  try {
+    const results = await prisma.$queryRawUnsafe<
+      Array<{
+        hospital_name: string;
+        distance_km: number;
+        wait_time_min: number;
+      }>
+    >(
+      `SELECT
+        hospital_name,
+        ST_Distance(coords::geography, ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography) / 1000 AS distance_km,
+        wait_time_min
+      FROM er_wait_times
+      WHERE ST_DWithin(coords::geography, ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography, $3 * 1000)
+        AND fetched_at > now() - interval '2 hours'
+      ORDER BY distance_km
+      LIMIT 5`,
+      lng, lat, 50
+    );
+
+    return results.map((r) => ({
+      hospitalName: r.hospital_name,
+      waitMinutes: r.wait_time_min,
+      patientsInED: 0,
+      patientsWaiting: 0,
+      distanceKm: r.distance_km,
+    }));
+  } catch {
+    return [];
+  }
 }
