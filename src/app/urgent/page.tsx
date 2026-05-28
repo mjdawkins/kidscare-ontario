@@ -193,14 +193,14 @@ async function searchErWaits(lat: number, lng: number) {
         wait_time_min: number;
       }>
     >(
-      `SELECT
+      `SELECT DISTINCT ON (hospital_name)
         hospital_name,
         ST_Distance(coords::geography, ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography) / 1000 AS distance_km,
         wait_time_min
       FROM er_wait_times
       WHERE ST_DWithin(coords::geography, ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography, $3 * 1000)
         AND fetched_at > now() - interval '2 hours'
-      ORDER BY distance_km
+      ORDER BY hospital_name, fetched_at DESC
       LIMIT 5`,
       lng, lat, 50
     );

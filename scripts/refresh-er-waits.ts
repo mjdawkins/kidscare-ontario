@@ -81,6 +81,11 @@ async function main() {
       console.log(`  ${name}: ${waitMinutes} min${patients ? `, ${patients} in ED` : ""}${waiting ? `, ${waiting} waiting` : ""}`);
 
       const now = new Date();
+      // Delete previous entries for this hospital to prevent duplicates
+      await prisma.$executeRawUnsafe(
+        `DELETE FROM er_wait_times WHERE hospital_name = $1`,
+        name
+      );
       await prisma.$executeRawUnsafe(
         `INSERT INTO er_wait_times (id, hospital_name, coords, wait_time_min, urgency_level, last_updated, fetched_at)
          VALUES (gen_random_uuid(), $1, ST_SetSRID(ST_MakePoint($2, $3), 4326), $4, 'all', $5, $6)`,
