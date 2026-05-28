@@ -18,6 +18,8 @@ interface WaitTimeResult {
   hospitalName: string;
   waitMinutes: number;
   isLive: boolean;
+  patientsInED: number;
+  patientsWaiting: number;
 }
 
 // ---- COORDINATE CACHE ----
@@ -108,7 +110,12 @@ async function scrapeHalton(page: any): Promise<WaitTimeResult[]> {
       ? parseInt(waitMatch[1]) * 60 + parseInt(waitMatch[2])
       : 0;
 
-    results.push({ hospitalName: name, waitMinutes, isLive: true });
+    const patientMatch = nearby.match(/Patients\s+in\s+Emergency\s+Department\s*(\d+)/i);
+    const patientsInED = parseInt(patientMatch?.[1] ?? "0");
+    const waitingMatch = nearby.match(/Patients\s+Waiting\s+to\s+be\s+seen\s*(\d+)/i);
+    const patientsWaiting = parseInt(waitingMatch?.[1] ?? "0");
+
+    results.push({ hospitalName: name, waitMinutes, isLive: true, patientsInED, patientsWaiting });
   }
 
   return results;
@@ -144,6 +151,8 @@ async function scrapeHQOntario(page: any): Promise<WaitTimeResult[]> {
         hospitalName: name,
         waitMinutes: Math.round(hours * 60),
         isLive: false,
+        patientsInED: 0,
+        patientsWaiting: 0,
       });
     }
   }
@@ -189,10 +198,29 @@ async function main() {
     console.log(`\nGeocoding and saving ${allResults.length} hospitals...`);
     const now = new Date();
 
+    // Merge: Halton live data takes priority over HQOntario averages
+    // Map Halton short names → HQOntario long names
+    const haltonMap: Record<string, string> = {
+      "Milton District Hospital": "Halton Healthcare Services Corp-Milton",
+      "Georgetown Hospital": "Halton Healthcare Services Corp-Georgetown",
+      "Oakville Trafalgar Memorial Hospital": "Halton Healthcare Services Corp-Oakville",
+    };
+
+    const merged = new Map<string, WaitTimeResult>();
+    for (const wt of allResults) {
+      const key = wt.hospitalName;
+      // If this is an HQO hospital that has a Halton live equivalent, skip it
+      const haltonMatch = Object.entries(haltonMap).find(([, hqo]) => hqo === key);
+      if (haltonMatch && allResults.some(r => r.hospitalName === haltonMatch[0])) {
+        continue; // Skip HQO version — live data exists
+      }
+      merged.set(key, wt);
+    }
+
     // Delete old data
     await prisma.$executeRawUnsafe(`DELETE FROM er_wait_times`);
 
-    for (const wt of allResults) {
+    for (const wt of merged.values()) {
       const coords = await geocodeHospital(wt.hospitalName);
       if (!coords) {
         // Skip hospitals we can't geocode
@@ -201,9 +229,9 @@ async function main() {
 
       await prisma.$executeRawUnsafe(
         `INSERT INTO er_wait_times (id, hospital_name, coords, wait_time_min, patients_in_ed, patients_waiting, urgency_level, last_updated, fetched_at)
-         VALUES (gen_random_uuid(), $1, ST_SetSRID(ST_MakePoint($2, $3), 4326), $4, 0, 0, $5, $6, $6)`,
+         VALUES (gen_random_uuid(), $1, ST_SetSRID(ST_MakePoint($2, $3), 4326), $4, $5, $6, $7, $8, $8)`,
         wt.hospitalName, coords.lng, coords.lat,
-        wt.waitMinutes,
+        wt.waitMinutes, wt.patientsInED, wt.patientsWaiting,
         wt.isLive ? "live" : "average",
         now
       );
