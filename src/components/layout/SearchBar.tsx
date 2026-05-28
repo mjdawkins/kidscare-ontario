@@ -6,12 +6,37 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { isValidPostalCode, normalizePostalCode } from "@/lib/utils";
 
+async function reverseGeocode(lat: number, lng: number): Promise<string | null> {
+  try {
+    const url = new URL("https://nominatim.openstreetmap.org/reverse");
+    url.searchParams.set("lat", lat.toString());
+    url.searchParams.set("lon", lng.toString());
+    url.searchParams.set("format", "json");
+    url.searchParams.set("zoom", "16");
+
+    const res = await fetch(url.toString(), {
+      headers: { "User-Agent": "KidsCareOntario/1.0" },
+      signal: AbortSignal.timeout(5000),
+    });
+
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.display_name ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export function SearchBar({ basePath }: { basePath: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const hasLocation = searchParams.get("lat") && searchParams.get("lng");
   const [value, setValue] = useState(searchParams.get("postal") ?? "");
   const [error, setError] = useState("");
   const [locating, setLocating] = useState(false);
+  const [locationName, setLocationName] = useState(
+    hasLocation ? "Your current location" : ""
+  );
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -28,11 +53,12 @@ export function SearchBar({ basePath }: { basePath: string }) {
     }
 
     setError("");
+    setLocationName("");
     const normalized = normalizePostalCode(trimmed);
     router.push(`${basePath}?postal=${normalized}`);
   }
 
-  function useMyLocation() {
+  async function useMyLocation() {
     if (!navigator.geolocation) {
       setError("Geolocation not supported by your browser");
       return;
@@ -42,9 +68,14 @@ export function SearchBar({ basePath }: { basePath: string }) {
     setError("");
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLocating(false);
+      async (position) => {
         const { latitude, longitude } = position.coords;
+
+        // Reverse geocode to show the user their location
+        const name = await reverseGeocode(latitude, longitude);
+        setLocationName(name ?? `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+        setLocating(false);
+
         router.push(
           `${basePath}?lat=${latitude.toFixed(6)}&lng=${longitude.toFixed(6)}`
         );
@@ -72,14 +103,20 @@ export function SearchBar({ basePath }: { basePath: string }) {
         />
         <Button type="submit">Search</Button>
       </form>
-      <Button
-        type="button"
-        variant="secondary"
-        onClick={useMyLocation}
-        disabled={locating}
-      >
-        {locating ? "Finding your location..." : "Use my location"}
-      </Button>
+
+      <div className="flex items-center gap-2">
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={useMyLocation}
+          disabled={locating}
+        >
+          {locating ? "Finding your location..." : "Use my location"}
+        </Button>
+        {locationName && (
+          <p className="text-sm text-zinc-500 truncate">{locationName}</p>
+        )}
+      </div>
     </div>
   );
 }
