@@ -11,6 +11,7 @@ export function SearchBar({ basePath }: { basePath: string }) {
   const searchParams = useSearchParams();
   const [value, setValue] = useState(searchParams.get("postal") ?? "");
   const [error, setError] = useState("");
+  const [locating, setLocating] = useState(false);
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -31,19 +32,54 @@ export function SearchBar({ basePath }: { basePath: string }) {
     router.push(`${basePath}?postal=${normalized}`);
   }
 
+  function useMyLocation() {
+    if (!navigator.geolocation) {
+      setError("Geolocation not supported by your browser");
+      return;
+    }
+
+    setLocating(true);
+    setError("");
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocating(false);
+        const { latitude, longitude } = position.coords;
+        router.push(
+          `${basePath}?lat=${latitude.toFixed(6)}&lng=${longitude.toFixed(6)}`
+        );
+      },
+      () => {
+        setLocating(false);
+        setError("Could not get your location. Enter a postal code instead.");
+      },
+      { timeout: 10000, maximumAge: 300000 }
+    );
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2">
-      <Input
-        placeholder="Postal code (e.g., M5V 2T6)"
-        value={value}
-        onChange={(e) => {
-          setValue(e.target.value);
-          setError("");
-        }}
-        error={error}
-        className="flex-1"
-      />
-      <Button type="submit">Search</Button>
-    </form>
+    <div className="flex flex-col gap-2">
+      <form onSubmit={handleSubmit} className="flex gap-2">
+        <Input
+          placeholder="Postal code (e.g., M5V 2T6)"
+          value={value}
+          onChange={(e) => {
+            setValue(e.target.value);
+            setError("");
+          }}
+          error={error}
+          className="flex-1"
+        />
+        <Button type="submit">Search</Button>
+      </form>
+      <Button
+        type="button"
+        variant="secondary"
+        onClick={useMyLocation}
+        disabled={locating}
+      >
+        {locating ? "Finding your location..." : "Use my location"}
+      </Button>
+    </div>
   );
 }
