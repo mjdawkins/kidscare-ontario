@@ -191,12 +191,16 @@ async function searchErWaits(lat: number, lng: number) {
         hospital_name: string;
         distance_km: number;
         wait_time_min: number;
+        patients_in_ed: number;
+        patients_waiting: number;
       }>
     >(
       `SELECT DISTINCT ON (hospital_name)
         hospital_name,
         ST_Distance(coords::geography, ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography) / 1000 AS distance_km,
-        wait_time_min
+        wait_time_min,
+        COALESCE(patients_in_ed, 0) AS patients_in_ed,
+        COALESCE(patients_waiting, 0) AS patients_waiting
       FROM er_wait_times
       WHERE ST_DWithin(coords::geography, ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography, $3 * 1000)
         AND fetched_at > now() - interval '2 hours'
@@ -205,13 +209,15 @@ async function searchErWaits(lat: number, lng: number) {
       lng, lat, 50
     );
 
-    return results.map((r) => ({
-      hospitalName: r.hospital_name,
-      waitMinutes: r.wait_time_min,
-      patientsInED: 0,
-      patientsWaiting: 0,
-      distanceKm: r.distance_km,
-    }));
+    return results
+      .map((r) => ({
+        hospitalName: r.hospital_name,
+        waitMinutes: r.wait_time_min,
+        patientsInED: r.patients_in_ed,
+        patientsWaiting: r.patients_waiting,
+        distanceKm: r.distance_km,
+      }))
+      .sort((a, b) => a.distanceKm - b.distanceKm);
   } catch {
     return [];
   }

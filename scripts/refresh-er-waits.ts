@@ -86,10 +86,13 @@ async function main() {
         `DELETE FROM er_wait_times WHERE hospital_name = $1`,
         name
       );
+      const patientsInED = parseInt(patientMatch?.[1] ?? "0");
+      const patientsWaiting = parseInt(waitingMatch?.[1] ?? "0");
+
       await prisma.$executeRawUnsafe(
-        `INSERT INTO er_wait_times (id, hospital_name, coords, wait_time_min, urgency_level, last_updated, fetched_at)
-         VALUES (gen_random_uuid(), $1, ST_SetSRID(ST_MakePoint($2, $3), 4326), $4, 'all', $5, $6)`,
-        name, info.lng, info.lat, waitMinutes, now, now
+        `INSERT INTO er_wait_times (id, hospital_name, coords, wait_time_min, patients_in_ed, patients_waiting, urgency_level, last_updated, fetched_at)
+         VALUES (gen_random_uuid(), $1, ST_SetSRID(ST_MakePoint($2, $3), 4326), $4, $5, $6, 'all', $7, $7)`,
+        name, info.lng, info.lat, waitMinutes, patientsInED, patientsWaiting, now
       );
       inserted++;
     }
