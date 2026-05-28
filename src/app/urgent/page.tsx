@@ -6,6 +6,8 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { prisma } from "@/lib/db/prisma";
 import { postalCodeToCoords } from "@/lib/geo";
 
+const SEARCH_RADIUS_KM = 75;
+
 interface SearchParams {
   lat?: string;
   lng?: string;
@@ -46,7 +48,6 @@ export default async function UrgentPage({
 }
 
 async function ClinicResults({ params }: { params: SearchParams }) {
-  // Resolve coordinates: use lat/lng directly, or geocode postal code
   let lat: number | null = null;
   let lng: number | null = null;
 
@@ -69,12 +70,24 @@ async function ClinicResults({ params }: { params: SearchParams }) {
     );
   }
 
-  const radius = 50; // km — covers Milton to downtown Toronto
-  const limit = 50;
+  const clinics = await searchClinics(lat, lng, params);
 
-  // Build query conditions
+  if (clinics.length === 0) {
+    return (
+      <p className="py-12 text-center text-zinc-500">
+        No clinics found within {SEARCH_RADIUS_KM}km of your location.
+        <br />
+        <span className="text-xs">({lat.toFixed(4)}, {lng.toFixed(4)})</span>
+      </p>
+    );
+  }
+
+  return <ClinicList clinics={clinics} />;
+}
+
+async function searchClinics(lat: number, lng: number, params: SearchParams) {
   const conditions: string[] = [];
-  const queryParams: unknown[] = [lng, lat, radius * 1000];
+  const queryParams: unknown[] = [lng, lat, SEARCH_RADIUS_KM * 1000];
   let pi = queryParams.length;
 
   if (params.open_now === "true") {
@@ -102,6 +115,7 @@ async function ClinicResults({ params }: { params: SearchParams }) {
   }
 
   const where = conditions.length > 0 ? `AND ${conditions.join(" AND ")}` : "";
+  const limit = 50;
 
   queryParams.push(limit);
 
@@ -137,12 +151,11 @@ async function ClinicResults({ params }: { params: SearchParams }) {
     ...queryParams
   );
 
-  // Compute is_open_now for each result
   const now = new Date();
   const today = now.getDay().toString();
   const currentTime = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
 
-  const clinics = results.map((r) => {
+  return results.map((r) => {
     const hours = r.hours as Record<string, { open: string; close: string }> | null;
     let isOpen = false;
     if (hours?.[today]) {
@@ -162,6 +175,4 @@ async function ClinicResults({ params }: { params: SearchParams }) {
       is_open_now: isOpen,
     };
   });
-
-  return <ClinicList clinics={clinics} />;
 }

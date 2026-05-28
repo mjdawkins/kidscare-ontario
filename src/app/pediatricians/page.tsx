@@ -5,7 +5,9 @@ import { DoctorFilters } from "@/components/doctor/DoctorFilters";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { prisma } from "@/lib/db/prisma";
 import { postalCodeToCoords } from "@/lib/geo";
-import { isStale, staleDays } from "@/lib/verification";
+import { staleDays } from "@/lib/verification";
+
+const SEARCH_RADIUS_KM = 75;
 
 interface SearchParams {
   lat?: string;
@@ -70,11 +72,24 @@ async function DoctorResults({ params }: { params: SearchParams }) {
     );
   }
 
-  const radius = 50; // km — covers Milton to downtown Toronto
-  const limit = 50;
+  const doctors = await searchDoctors(lat, lng, params);
 
+  if (doctors.length === 0) {
+    return (
+      <p className="py-12 text-center text-zinc-500">
+        No doctors found within {SEARCH_RADIUS_KM}km of your location.
+        <br />
+        <span className="text-xs">({lat.toFixed(4)}, {lng.toFixed(4)})</span>
+      </p>
+    );
+  }
+
+  return <DoctorList doctors={doctors} />;
+}
+
+async function searchDoctors(lat: number, lng: number, params: SearchParams) {
   const conditions: string[] = [];
-  const queryParams: unknown[] = [lng, lat, radius * 1000];
+  const queryParams: unknown[] = [lng, lat, SEARCH_RADIUS_KM * 1000];
   let pi = queryParams.length;
 
   if (params.doctor_type) {
@@ -102,6 +117,7 @@ async function DoctorResults({ params }: { params: SearchParams }) {
   }
 
   const where = conditions.length > 0 ? `AND ${conditions.join(" AND ")}` : "";
+  const limit = 50;
 
   queryParams.push(limit);
 
@@ -140,14 +156,18 @@ async function DoctorResults({ params }: { params: SearchParams }) {
     ...queryParams
   );
 
-  const doctors = rows.map((r) => ({
-    ...r,
+  return rows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    doctor_type: r.doctor_type,
+    referral_required: r.referral_required,
     accepting_status: r.accepting_status as "accepting" | "waitlist" | "not_accepting" | "unknown",
+    languages: r.languages,
+    address: r.address,
+    distance_km: r.distance_km,
     verification: {
       verification_count: r.verification_count,
       stale_days: staleDays(r.last_verified ? new Date(r.last_verified) : null),
     },
   }));
-
-  return <DoctorList doctors={doctors} />;
 }
