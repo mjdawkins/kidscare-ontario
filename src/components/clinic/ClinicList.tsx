@@ -8,6 +8,7 @@ interface Clinic {
   address: string;
   distance_km: number;
   phone: string | null;
+  hours: Record<string, { open: string; close: string }> | null;
   sees_children: boolean;
   open_saturday: boolean;
   open_sunday: boolean;

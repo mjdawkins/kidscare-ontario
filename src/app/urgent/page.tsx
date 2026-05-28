@@ -149,7 +149,16 @@ async function ClinicResults({ params }: { params: SearchParams }) {
       isOpen = hours[today].open <= currentTime && hours[today].close >= currentTime;
     }
     return {
-      ...r,
+      id: r.id,
+      name: r.name,
+      address: r.address,
+      distance_km: r.distance_km,
+      phone: r.phone,
+      hours,
+      sees_children: r.sees_children,
+      open_saturday: r.open_saturday,
+      open_sunday: r.open_sunday,
+      open_after_6pm: r.open_after_6pm,
       is_open_now: isOpen,
     };
   });
