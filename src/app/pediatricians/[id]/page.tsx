@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DoctorProfile } from "@/components/doctor/DoctorProfile";
 import { VerifyForm } from "@/components/doctor/VerifyForm";
+import { SubscribeButton } from "@/components/doctor/SubscribeButton";
 import { prisma } from "@/lib/db/prisma";
 import { isStale, staleDays } from "@/lib/verification";
 import { createClient } from "@/lib/supabase/server";
@@ -85,6 +86,10 @@ export default async function DoctorDetailPage({
             Sign in to confirm whether this doctor is accepting patients.
           </p>
         )}
+      </div>
+
+      <div className="rounded-xl border border-zinc-200 p-4">
+        <SubscribeButton doctorId={id} doctorName={doctor.name} />
       </div>
 
       {recentVerifications.length > 0 && (
