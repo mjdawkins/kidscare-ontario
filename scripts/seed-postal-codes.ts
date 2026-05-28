@@ -48,7 +48,8 @@ async function main() {
     const city = cols[3]?.trim() ?? "";
     const province = cols[4]?.trim() ?? "ON";
 
-    if (!/^[A-Z]\d[A-Z]\d[A-Z]\d$/.test(rawCode)) continue;
+    // Accept 3-char FSA (e.g. "M5V") or 6-char full postal code (e.g. "M5V2T6")
+    if (!/^[A-Z]\d[A-Z](\d[A-Z]\d)?$/.test(rawCode)) continue;
     if (isNaN(lat) || isNaN(lng)) continue;
 
     batch.push({ postalCode: rawCode, lat, lng, city, province });
