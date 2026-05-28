@@ -48,8 +48,8 @@ export function ClinicCard({ clinic }: ClinicCardProps) {
         </div>
         <div className="flex flex-col items-end gap-1 shrink-0">
           <OpenNowBadge isOpen={clinic.is_open_now} />
-          {!clinic.sees_children && (
-            <span className="text-xs text-amber-600 font-medium">May not see children</span>
+          {clinic.sees_children && (
+            <span className="text-xs text-green-700 font-medium">Sees children</span>
           )}
         </div>
       </div>
