@@ -38,6 +38,7 @@ interface ClinicCardProps {
 
 export function ClinicCard({ clinic }: ClinicCardProps) {
   const hoursToday = todayHours(clinic.hours);
+  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(clinic.address)}`;
 
   return (
     <Card className="flex flex-col gap-2">
@@ -69,11 +70,21 @@ export function ClinicCard({ clinic }: ClinicCardProps) {
         openAfter6pm={clinic.open_after_6pm}
       />
 
-      {clinic.phone && (
-        <a href={`tel:${clinic.phone}`} className="text-sm font-medium text-blue-600 hover:underline">
-          {clinic.phone}
+      <div className="flex items-center gap-4 pt-1">
+        {clinic.phone && (
+          <a href={`tel:${clinic.phone}`} className="text-sm font-medium text-blue-600 hover:underline">
+            {clinic.phone}
+          </a>
+        )}
+        <a
+          href={directionsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline"
+        >
+          Get Directions &nearr;
         </a>
-      )}
+      </div>
     </Card>
   );
 }

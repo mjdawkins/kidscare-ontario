@@ -24,6 +24,8 @@ interface DoctorCardProps {
 }
 
 export function DoctorCard({ doctor }: DoctorCardProps) {
+  const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(doctor.name + " pediatrician")}`;
+
   return (
     <Link href={`/pediatricians/${doctor.id}`}>
       <Card className="flex flex-col gap-2">
@@ -47,6 +49,17 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
           staleDays={doctor.verification.stale_days}
           lastVerified={null}
         />
+        <div className="pt-1">
+          <a
+            href={googleSearchUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline"
+            onClick={(e) => e.stopPropagation()}
+          >
+            Search Google &nearr;
+          </a>
+        </div>
       </Card>
     </Link>
   );
