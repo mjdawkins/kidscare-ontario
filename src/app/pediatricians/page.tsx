@@ -70,7 +70,7 @@ async function DoctorResults({ params }: { params: SearchParams }) {
     );
   }
 
-  const radius = 50;
+  const radius = 50; // km — covers Milton to downtown Toronto
   const limit = 50;
 
   const conditions: string[] = [];

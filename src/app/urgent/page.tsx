@@ -69,7 +69,7 @@ async function ClinicResults({ params }: { params: SearchParams }) {
     );
   }
 
-  const radius = 25; // km
+  const radius = 50; // km — covers Milton to downtown Toronto
   const limit = 50;
 
   // Build query conditions
