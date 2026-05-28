@@ -6,7 +6,7 @@ const config: Record<AcceptingStatus, { label: string; variant: "green" | "amber
   accepting: { label: "Accepting patients", variant: "green" },
   waitlist: { label: "Waitlist only", variant: "amber" },
   not_accepting: { label: "Not accepting", variant: "red" },
-  unknown: { label: "Status unknown", variant: "neutral" },
+  unknown: { label: "Accepting patients: unknown", variant: "neutral" },
 };
 
 export function StatusBadge({ status }: { status: AcceptingStatus }) {
