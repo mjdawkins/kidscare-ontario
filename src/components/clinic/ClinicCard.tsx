@@ -82,7 +82,7 @@ export function ClinicCard({ clinic }: ClinicCardProps) {
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline"
         >
-          Get Directions &nearr;
+          Get Directions &#8599;
         </a>
       </div>
     </Card>

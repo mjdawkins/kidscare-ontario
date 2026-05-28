@@ -57,7 +57,7 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
             className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline"
             onClick={(e) => e.stopPropagation()}
           >
-            Search Google &nearr;
+            Search Google &#8599;
           </a>
         </div>
       </Card>
