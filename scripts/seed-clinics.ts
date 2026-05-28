@@ -69,14 +69,25 @@ async function main() {
       if (!period.open || !period.close) continue;
 
       const day = period.open.day;
-      const openTime = `${String(period.open.hour).padStart(2, "0")}:${String(period.open.minute).padStart(2, "0")}`;
-      const closeTime = `${String(period.close.hour).padStart(2, "0")}:${String(period.close.minute).padStart(2, "0")}`;
 
-      hoursJson[day.toString()] = { open: openTime, close: closeTime };
+      // Legacy Places API returns time as "0900" string, not { hour, minute }
+      function parseTime(t: string): { h: number; m: number; formatted: string } {
+        if (t.length >= 4) {
+          const h = parseInt(t.slice(0, -2), 10);
+          const m = parseInt(t.slice(-2), 10);
+          return { h, m, formatted: `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}` };
+        }
+        return { h: 0, m: 0, formatted: "00:00" };
+      }
+
+      const openParsed = parseTime(period.open.time);
+      const closeParsed = parseTime(period.close.time);
+
+      hoursJson[day.toString()] = { open: openParsed.formatted, close: closeParsed.formatted };
 
       if (day === 6) openSaturday = true;
       if (day === 0) openSunday = true;
-      if (day >= 1 && day <= 5 && period.close.hour >= 18) openAfter6pm = true;
+      if (day >= 1 && day <= 5 && closeParsed.h >= 18) openAfter6pm = true;
     }
 
     const lat = details.geometry?.location?.lat;
@@ -85,8 +96,8 @@ async function main() {
     if (!lat || !lng) continue;
 
     await prisma.$executeRawUnsafe(
-      `INSERT INTO clinics (id, name, address, coords, phone, hours, open_saturday, open_sunday, open_after_6pm, google_place_id, created_at, updated_at)
-       VALUES (gen_random_uuid(), $1, $2, ST_SetSRID(ST_MakePoint($3, $4), 4326), $5, $6::jsonb, $7, $8, $9, $10, now(), now())
+      `INSERT INTO clinics (id, name, address, coords, phone, hours, open_saturday, open_sunday, open_after_6pm, sees_children, google_place_id, created_at, updated_at)
+       VALUES (gen_random_uuid(), $1, $2, ST_SetSRID(ST_MakePoint($3, $4), 4326), $5, $6::jsonb, $7, $8, $9, $10, $11, now(), now())
        ON CONFLICT DO NOTHING`,
       details.name ?? place.name,
       details.formatted_address ?? place.vicinity ?? "",
@@ -97,6 +108,7 @@ async function main() {
       openSaturday,
       openSunday,
       openAfter6pm,
+      true, // Walk-in clinics returned by Google Places generally see children
       place.place_id
     );
 
