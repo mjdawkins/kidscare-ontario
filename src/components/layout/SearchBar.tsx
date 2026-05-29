@@ -110,11 +110,12 @@ export function SearchBar({ basePath }: { basePath: string }) {
           variant="secondary"
           onClick={useMyLocation}
           disabled={locating}
+          className="font-semibold"
         >
           {locating ? "Finding your location..." : "Use my location"}
         </Button>
         {locationName && (
-          <p className="text-sm text-zinc-500 truncate">{locationName}</p>
+          <p className="text-sm text-zinc-600 truncate">{locationName}</p>
         )}
       </div>
     </div>

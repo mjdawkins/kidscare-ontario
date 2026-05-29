@@ -25,6 +25,18 @@ interface WaitTimeResult {
 // ---- COORDINATE CACHE ----
 // Geocodes hospital names via Nominatim. Results cached in memory for this run
 // and stored in DB for future runs (coordinates survive table deletion).
+// Halton hospitals are hardcoded — Nominatim can't resolve hospital names precisely.
+
+const HARDCODED_COORDS: Record<string, { lat: number; lng: number }> = {
+  // Halton live names
+  "Milton District Hospital": { lat: 43.4949, lng: -79.8704 },
+  "Georgetown Hospital": { lat: 43.6458, lng: -79.9223 },
+  "Oakville Trafalgar Memorial Hospital": { lat: 43.4525, lng: -79.7389 },
+  // HQOntario names for the same hospitals (fallback when live data fails)
+  "Halton Healthcare Services Corp-Milton": { lat: 43.4949, lng: -79.8704 },
+  "Halton Healthcare Services Corp-Georgetown": { lat: 43.6458, lng: -79.9223 },
+  "Halton Healthcare Services Corp-Oakville": { lat: 43.4525, lng: -79.7389 },
+};
 
 const coordCache = new Map<string, { lat: number; lng: number }>();
 
@@ -42,7 +54,9 @@ async function loadCoordCache() {
 let lastNominatim = 0;
 
 async function geocodeHospital(name: string): Promise<{ lat: number; lng: number } | null> {
-  // Check cache first
+  // Hardcoded overrides for known hospitals
+  if (HARDCODED_COORDS[name]) return HARDCODED_COORDS[name];
+  // Check cache
   if (coordCache.has(name)) return coordCache.get(name)!;
 
   // Geocode via Nominatim
