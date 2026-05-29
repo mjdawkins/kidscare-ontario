@@ -19,7 +19,6 @@ export function DoctorFilters() {
   const activeType = searchParams.get("doctor_type");
   const activeStatus = searchParams.get("accepting_status");
   const activeReferral = searchParams.get("referral_required");
-  const activeLanguage = searchParams.get("language");
 
   return (
     <div className="flex flex-col gap-3">
@@ -53,26 +52,6 @@ export function DoctorFilters() {
         <option value="">Any referral requirement</option>
         <option value="false">No referral needed</option>
         <option value="true">Referral required</option>
-      </select>
-
-      <select
-        value={activeLanguage ?? ""}
-        onChange={(e) => setParam("language", e.target.value || null)}
-        className="h-10 rounded-lg border border-slate-300 px-3 text-sm"
-      >
-        <option value="">Any language</option>
-        <option value="Arabic">Arabic</option>
-        <option value="Cantonese">Cantonese</option>
-        <option value="English">English</option>
-        <option value="French">French</option>
-        <option value="Hindi">Hindi</option>
-        <option value="Korean">Korean</option>
-        <option value="Mandarin">Mandarin</option>
-        <option value="Punjabi">Punjabi</option>
-        <option value="Spanish">Spanish</option>
-        <option value="Tamil">Tamil</option>
-        <option value="Urdu">Urdu</option>
-        <option value="Vietnamese">Vietnamese</option>
       </select>
     </div>
   );
