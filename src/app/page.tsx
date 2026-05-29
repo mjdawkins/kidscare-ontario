@@ -9,10 +9,10 @@ export default function Home() {
       <main className="flex-1 px-4 py-12 pb-24 md:py-20">
         <div className="mx-auto max-w-lg space-y-10">
           <div className="space-y-3 text-center">
-            <h1 className="text-3xl font-bold tracking-tight text-zinc-900 md:text-4xl">
+            <h1 className="text-3xl font-bold tracking-tight text-black md:text-4xl">
               KidsCare Ontario
             </h1>
-            <p className="text-lg text-zinc-500 max-w-sm mx-auto">
+            <p className="text-lg text-zinc-700 max-w-sm mx-auto">
               Find pediatricians, walk-in clinics, and ER wait times for your child — all in one place.
             </p>
           </div>
@@ -28,10 +28,10 @@ export default function Home() {
                 </svg>
               </div>
               <div className="min-w-0">
-                <h2 className="font-semibold text-zinc-900 group-hover:text-red-700 transition-colors">
+                <h2 className="font-semibold text-black group-hover:text-red-700 transition-colors">
                   Urgent Care
                 </h2>
-                <p className="text-sm text-zinc-500 mt-0.5">
+                <p className="text-sm text-zinc-700 mt-0.5">
                   Find walk-in clinics open now. See ER wait times. Get directions.
                 </p>
               </div>
@@ -47,10 +47,10 @@ export default function Home() {
                 </svg>
               </div>
               <div className="min-w-0">
-                <h2 className="font-semibold text-zinc-900 group-hover:text-blue-700 transition-colors">
+                <h2 className="font-semibold text-black group-hover:text-blue-700 transition-colors">
                   Find a Doctor
                 </h2>
-                <p className="text-sm text-zinc-500 mt-0.5">
+                <p className="text-sm text-zinc-700 mt-0.5">
                   Search pediatricians by location. See who needs a referral. Get roster alerts.
                 </p>
               </div>

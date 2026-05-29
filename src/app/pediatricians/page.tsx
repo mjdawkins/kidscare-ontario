@@ -29,8 +29,8 @@ export default async function PediatriciansPage({
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Find a Pediatrician</h1>
-        <p className="text-zinc-600">
+        <h1 className="text-2xl font-bold text-black">Find a Pediatrician</h1>
+        <p className="text-zinc-700">
           Search pediatricians and family doctors near you. See who&apos;s accepting patients and whether you need a referral.
         </p>
       </div>
@@ -66,7 +66,7 @@ async function DoctorResults({ params }: { params: SearchParams }) {
 
   if (lat === null || lng === null) {
     return (
-      <p className="py-12 text-center text-zinc-500">
+      <p className="py-12 text-center text-zinc-600">
         Enter a postal code or use your location to find doctors near you.
       </p>
     );
@@ -76,7 +76,7 @@ async function DoctorResults({ params }: { params: SearchParams }) {
 
   if (doctors.length === 0) {
     return (
-      <p className="py-12 text-center text-zinc-500">
+      <p className="py-12 text-center text-zinc-600">
         No doctors found within {SEARCH_RADIUS_KM}km of your location.
         <br />
         <span className="text-xs">({lat.toFixed(4)}, {lng.toFixed(4)})</span>

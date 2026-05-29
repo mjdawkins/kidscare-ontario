@@ -54,7 +54,7 @@ export default async function DoctorDetailPage({
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <Link href="/pediatricians" className="text-sm text-zinc-500 hover:text-zinc-700">
+      <Link href="/pediatricians" className="text-sm text-zinc-600 hover:text-zinc-700">
         &larr; Back to search
       </Link>
 
@@ -82,7 +82,7 @@ export default async function DoctorDetailPage({
         {user ? (
           <VerifyForm doctorId={id} />
         ) : (
-          <p className="text-sm text-zinc-500 text-center">
+          <p className="text-sm text-zinc-600 text-center">
             Sign in to confirm whether this doctor is accepting patients.
           </p>
         )}
@@ -101,17 +101,17 @@ export default async function DoctorDetailPage({
                 {v.reportedStatus === "accepting" ? "✓" : v.reportedStatus === "waitlist" ? "~" : "✗"}{" "}
                 {v.reportedStatus.replace("_", " ")}
               </span>
-              <span className="text-zinc-400">·</span>
-              <span className="text-zinc-400">
+              <span className="text-zinc-500">·</span>
+              <span className="text-zinc-500">
                 {v.howConfirmed.replace(/_/g, " ")}
               </span>
               {v.notes && (
                 <>
-                  <span className="text-zinc-400">·</span>
+                  <span className="text-zinc-500">·</span>
                   <span className="italic">"{v.notes}"</span>
                 </>
               )}
-              <span className="text-zinc-400 ml-auto text-xs">
+              <span className="text-zinc-500 ml-auto text-xs">
                 {new Date(v.createdAt).toLocaleDateString()}
               </span>
             </div>
