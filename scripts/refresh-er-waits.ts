@@ -20,27 +20,15 @@ interface WaitTimeResult {
   isLive: boolean;
   patientsInED: number;
   patientsWaiting: number;
+  address?: string; // Street address for precise geocoding
 }
 
 // ---- COORDINATE CACHE ----
-// Geocodes hospital names via Nominatim. Results cached in memory for this run
-// and stored in DB for future runs (coordinates survive table deletion).
-// Halton hospitals are hardcoded — Nominatim can't resolve hospital names precisely.
-
-const HARDCODED_COORDS: Record<string, { lat: number; lng: number }> = {
-  // Halton live names
-  "Milton District Hospital": { lat: 43.4949, lng: -79.8704 },
-  "Georgetown Hospital": { lat: 43.6458, lng: -79.9223 },
-  "Oakville Trafalgar Memorial Hospital": { lat: 43.4525, lng: -79.7389 },
-  // HQOntario names for the same hospitals (fallback when live data fails)
-  "Halton Healthcare Services Corp-Milton": { lat: 43.4949, lng: -79.8704 },
-  "Halton Healthcare Services Corp-Georgetown": { lat: 43.6458, lng: -79.9223 },
-  "Halton Healthcare Services Corp-Oakville": { lat: 43.4525, lng: -79.7389 },
-};
+// Geocodes via Nominatim using street addresses (precise) or hospital names.
+// Results cached in DB across runs — no hardcoded coordinates needed.
 
 const coordCache = new Map<string, { lat: number; lng: number }>();
 
-// Pre-load existing coordinates from DB before deleting old data
 async function loadCoordCache() {
   const rows = await prisma.$queryRawUnsafe<Array<{ name: string; lat: number; lng: number }>>(
     `SELECT hospital_name as name, ST_Y(coords::geometry) as lat, ST_X(coords::geometry) as lng
@@ -53,28 +41,27 @@ async function loadCoordCache() {
 
 let lastNominatim = 0;
 
-async function geocodeHospital(name: string): Promise<{ lat: number; lng: number } | null> {
-  // Hardcoded overrides for known hospitals
-  if (HARDCODED_COORDS[name]) return HARDCODED_COORDS[name];
-  // Check cache
+async function geocodeHospital(name: string, address?: string): Promise<{ lat: number; lng: number } | null> {
   if (coordCache.has(name)) return coordCache.get(name)!;
 
-  // Geocode via Nominatim
   const now = Date.now();
   const wait = Math.max(0, 1100 - (now - lastNominatim));
   if (wait > 0) await new Promise(r => setTimeout(r, wait));
   lastNominatim = Date.now();
 
   try {
-    const query = name
-      .replace("Corp-", "Corporation ")
-      .replace("Hlth", "Health")
-      .replace("Hosp", "Hospital")
-      .replace("Ctr", "Centre")
-      .replace("Ntwrk", "Network")
-      .replace("Gen.", "General")
-      .replace("Tor. East", "Toronto East")
-      + " Ontario Canada";
+    // Use street address when available (much more precise than hospital name)
+    const query = address
+      ? `${address}, Ontario, Canada`
+      : name
+          .replace("Corp-", "Corporation ")
+          .replace("Hlth", "Health")
+          .replace("Hosp", "Hospital")
+          .replace("Ctr", "Centre")
+          .replace("Ntwrk", "Network")
+          .replace("Gen.", "General")
+          .replace("Tor. East", "Toronto East")
+        + " Ontario Canada";
 
     const url = new URL("https://nominatim.openstreetmap.org/search");
     url.searchParams.set("q", query);
@@ -118,18 +105,28 @@ async function scrapeHalton(page: any): Promise<WaitTimeResult[]> {
     const idx = text.indexOf(name);
     if (idx === -1) continue;
 
-    const nearby = text.slice(idx, idx + 500);
+    const nearby = text.slice(idx, idx + 800);
+
+    // Parse wait time: "01 Hour(s) and 00 Minute(s)"
     const waitMatch = nearby.match(/(\d+)\s*Hour.s.\s*and\s*(\d+)\s*Minute.s./i);
     const waitMinutes = waitMatch
       ? parseInt(waitMatch[1]) * 60 + parseInt(waitMatch[2])
       : 0;
 
+    // Parse patient counts
     const patientMatch = nearby.match(/Patients\s+in\s+Emergency\s+Department\s*(\d+)/i);
     const patientsInED = parseInt(patientMatch?.[1] ?? "0");
     const waitingMatch = nearby.match(/Patients\s+Waiting\s+to\s+be\s+seen\s*(\d+)/i);
     const patientsWaiting = parseInt(waitingMatch?.[1] ?? "0");
 
-    results.push({ hospitalName: name, waitMinutes, isLive: true, patientsInED, patientsWaiting });
+    // Parse street address from the page: "725 Bronte Street South ,\nMilton, ON L9T 9K1"
+    const addrMatch = nearby.match(/Address\s*\/\s*Phone Number\s*\n(.+?),\s*\n(.+?)\s*\n/i);
+    let address: string | undefined;
+    if (addrMatch) {
+      address = `${addrMatch[1].trim()}, ${addrMatch[2].trim()}`;
+    }
+
+    results.push({ hospitalName: name, waitMinutes, isLive: true, patientsInED, patientsWaiting, address });
   }
 
   return results;
@@ -235,7 +232,7 @@ async function main() {
     await prisma.$executeRawUnsafe(`DELETE FROM er_wait_times`);
 
     for (const wt of merged.values()) {
-      const coords = await geocodeHospital(wt.hospitalName);
+      const coords = await geocodeHospital(wt.hospitalName, wt.address);
       if (!coords) {
         // Skip hospitals we can't geocode
         continue;
