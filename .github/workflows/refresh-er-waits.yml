@@ -1,0 +1,15 @@
+name: Refresh ER Wait Times
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger ER wait refresh
+        run: |
+          curl -X POST https://kidscare-ontario.vercel.app/api/cron/daily \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --fail --silent --show-error
