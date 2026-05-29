@@ -7,7 +7,7 @@ const variants: Record<string, string> = {
   green: "bg-emerald-100 text-emerald-800 ring-emerald-600/30",
   amber: "bg-amber-100 text-amber-800 ring-amber-600/30",
   red: "bg-rose-100 text-rose-800 ring-rose-600/30",
-  neutral: "bg-zinc-100 text-gray-800 ring-zinc-400/20",
+  neutral: "bg-zinc-100 text-neutral-800 ring-zinc-400/20",
   blue: "bg-blue-100 text-blue-800 ring-blue-600/30",
 };
 

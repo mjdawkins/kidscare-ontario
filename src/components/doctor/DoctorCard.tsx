@@ -30,14 +30,14 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
     <Link href={`/pediatricians/${doctor.id}`}>
       <Card className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center gap-2">
-          <h3 className="font-semibold text-gray-900">{doctor.name}</h3>
+          <h3 className="font-semibold text-neutral-900">{doctor.name}</h3>
           <StatusBadge status={doctor.accepting_status} />
           <ReferralBadge required={doctor.referral_required} />
         </div>
-        <p className="text-sm text-gray-700">{doctor.address}</p>
+        <p className="text-sm text-neutral-700">{doctor.address}</p>
         <DistanceDisplay km={doctor.distance_km} />
         {doctor.languages.length > 0 && (
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-neutral-600">
             {doctor.languages.join(", ")}
           </p>
         )}

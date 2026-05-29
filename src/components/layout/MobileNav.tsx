@@ -55,7 +55,7 @@ export function MobileNav() {
               key={href}
               href={href}
               className={`flex flex-col items-center gap-0.5 px-2 py-1 min-w-[56px] ${
-                active ? "text-blue-600" : "text-gray-500"
+                active ? "text-blue-600" : "text-neutral-500"
               }`}
             >
               {icon(active)}

@@ -12,7 +12,7 @@ interface ClinicMapViewProps {
 export function ClinicMapView({ clinics }: ClinicMapViewProps) {
   return (
     <div className="flex h-64 items-center justify-center rounded-xl bg-zinc-100 md:h-full">
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-neutral-600">
         Map view — {clinics.length} clinics loaded
       </p>
     </div>

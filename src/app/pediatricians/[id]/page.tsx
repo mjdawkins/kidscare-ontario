@@ -54,7 +54,7 @@ export default async function DoctorDetailPage({
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <Link href="/pediatricians" className="text-sm text-gray-700 hover:text-gray-800">
+      <Link href="/pediatricians" className="text-sm text-neutral-700 hover:text-neutral-800">
         &larr; Back to search
       </Link>
 
@@ -82,7 +82,7 @@ export default async function DoctorDetailPage({
         {user ? (
           <VerifyForm doctorId={id} />
         ) : (
-          <p className="text-sm text-gray-700 text-center">
+          <p className="text-sm text-neutral-700 text-center">
             Sign in to confirm whether this doctor is accepting patients.
           </p>
         )}
@@ -94,24 +94,24 @@ export default async function DoctorDetailPage({
 
       {recentVerifications.length > 0 && (
         <div className="space-y-2">
-          <h3 className="font-semibold text-gray-900">Recent Verifications</h3>
+          <h3 className="font-semibold text-neutral-900">Recent Verifications</h3>
           {recentVerifications.map((v, i) => (
-            <div key={i} className="text-sm text-gray-700 flex items-center gap-2">
+            <div key={i} className="text-sm text-neutral-700 flex items-center gap-2">
               <span>
                 {v.reportedStatus === "accepting" ? "✓" : v.reportedStatus === "waitlist" ? "~" : "✗"}{" "}
                 {v.reportedStatus.replace("_", " ")}
               </span>
-              <span className="text-gray-600">·</span>
-              <span className="text-gray-600">
+              <span className="text-neutral-600">·</span>
+              <span className="text-neutral-600">
                 {v.howConfirmed.replace(/_/g, " ")}
               </span>
               {v.notes && (
                 <>
-                  <span className="text-gray-600">·</span>
+                  <span className="text-neutral-600">·</span>
                   <span className="italic">"{v.notes}"</span>
                 </>
               )}
-              <span className="text-gray-600 ml-auto text-xs">
+              <span className="text-neutral-600 ml-auto text-xs">
                 {new Date(v.createdAt).toLocaleDateString()}
               </span>
             </div>

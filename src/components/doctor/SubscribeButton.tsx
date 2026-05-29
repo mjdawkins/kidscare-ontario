@@ -17,7 +17,7 @@ export function SubscribeButton({ doctorId, doctorName }: SubscribeButtonProps) 
 
   if (!user) {
     return (
-      <p className="text-sm text-gray-600 text-center">
+      <p className="text-sm text-neutral-600 text-center">
         Sign in to get notified when this doctor is accepting patients.
       </p>
     );
