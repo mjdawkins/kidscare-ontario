@@ -70,12 +70,9 @@ export function SearchBar({ basePath }: { basePath: string }) {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
-
-        // Reverse geocode to show the user their location
         const name = await reverseGeocode(latitude, longitude);
         setLocationName(name ?? `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
         setLocating(false);
-
         router.push(
           `${basePath}?lat=${latitude.toFixed(6)}&lng=${longitude.toFixed(6)}`
         );
@@ -89,7 +86,7 @@ export function SearchBar({ basePath }: { basePath: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="space-y-2">
       <form onSubmit={handleSubmit} className="flex gap-2">
         <Input
           placeholder="Postal code (e.g., M5V 2T6)"
@@ -105,15 +102,18 @@ export function SearchBar({ basePath }: { basePath: string }) {
       </form>
 
       <div className="flex items-center gap-2">
-        <Button
+        <button
           type="button"
-          variant="secondary"
           onClick={useMyLocation}
           disabled={locating}
-          className="font-semibold"
+          className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 disabled:opacity-50"
         >
-          {locating ? "Finding your location..." : "Use my location"}
-        </Button>
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+          </svg>
+          {locating ? "Finding..." : "Use my location"}
+        </button>
         {locationName && (
           <p className="text-sm text-slate-600 truncate">{locationName}</p>
         )}

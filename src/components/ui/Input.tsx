@@ -13,7 +13,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       )}
       <input
         ref={ref}
-        className={`h-10 rounded-lg border border-slate-300 px-3 text-base placeholder:text-slate-400 focus:border-black focus:outline-none focus:ring-1 focus:ring-black ${error ? "border-red-500" : ""} ${className}`}
+        className={`h-10 rounded-lg border border-slate-300 bg-white px-3 text-base text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 ${error ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""} ${className}`}
         {...props}
       />
       {error && <p className="text-sm text-red-600">{error}</p>}
