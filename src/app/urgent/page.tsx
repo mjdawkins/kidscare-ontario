@@ -193,7 +193,7 @@ async function searchErWaits(lat: number, lng: number) {
         urgency_level
       FROM er_wait_times
       WHERE ST_DWithin(coords::geography, ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography, $3 * 1000)
-        AND fetched_at > now() - interval '2 hours'
+        AND fetched_at > now() - interval '24 hours'
       ORDER BY hospital_name, fetched_at DESC
       LIMIT 5`,
       lng, lat, 50
