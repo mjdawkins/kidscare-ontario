@@ -35,7 +35,7 @@ export function ClinicFilters() {
             className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
               active
                 ? "bg-blue-600 text-white shadow-sm"
-                : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                : "bg-zinc-100 text-gray-700 hover:bg-zinc-200"
             }`}
           >
             {label}

@@ -58,7 +58,7 @@ export function AlertForm() {
       />
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-zinc-700">Radius (km)</label>
+        <label className="text-sm font-medium text-gray-800">Radius (km)</label>
         <input
           type="range"
           min={5}
@@ -68,7 +68,7 @@ export function AlertForm() {
           onChange={(e) => setRadius(parseInt(e.target.value))}
           className="w-full"
         />
-        <span className="text-sm text-zinc-500">{radius} km</span>
+        <span className="text-sm text-gray-600">{radius} km</span>
       </div>
 
       <select

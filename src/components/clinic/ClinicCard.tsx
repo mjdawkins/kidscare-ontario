@@ -56,8 +56,8 @@ export function ClinicCard({ clinic }: ClinicCardProps) {
     <Card className="flex flex-col gap-2">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h3 className="font-semibold text-zinc-900">{clinic.name}</h3>
-          <p className="text-sm text-zinc-600">{clinic.address}</p>
+          <h3 className="font-semibold text-gray-900">{clinic.name}</h3>
+          <p className="text-sm text-gray-700">{clinic.address}</p>
         </div>
         <div className="flex flex-col items-end gap-1 shrink-0">
           <OpenNowBadge isOpen={open} />
@@ -70,7 +70,7 @@ export function ClinicCard({ clinic }: ClinicCardProps) {
       <DistanceDisplay km={clinic.distance_km} />
 
       {hoursToday && (
-        <p className="text-sm text-zinc-700">
+        <p className="text-sm text-gray-800">
           <span className="font-medium">{DAY_NAMES[new Date().getDay()]}:</span>{" "}
           {hoursToday}
         </p>

@@ -23,7 +23,7 @@ export function ClinicList({ clinics }: ClinicListProps) {
   if (clinics.length === 0) {
     return (
       <div className="py-12 text-center">
-        <p className="text-zinc-500">No clinics found. Try expanding your search radius.</p>
+        <p className="text-gray-600">No clinics found. Try expanding your search radius.</p>
       </div>
     );
   }

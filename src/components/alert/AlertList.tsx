@@ -26,7 +26,7 @@ export function AlertList({ alerts }: AlertListProps) {
   if (alerts.length === 0) {
     return (
       <div className="py-12 text-center">
-        <p className="text-zinc-500">No alerts yet. Subscribe to get notified when a pediatrician opens their roster.</p>
+        <p className="text-gray-600">No alerts yet. Subscribe to get notified when a pediatrician opens their roster.</p>
       </div>
     );
   }

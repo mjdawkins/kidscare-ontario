@@ -6,7 +6,7 @@ interface StalenessWarningProps {
 export function StalenessWarning({ staleDays, lastVerified }: StalenessWarningProps) {
   if (lastVerified === null) {
     return (
-      <p className="text-sm text-zinc-500">
+      <p className="text-sm text-gray-600">
         No community data yet — be the first to verify
       </p>
     );

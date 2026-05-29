@@ -115,7 +115,7 @@ export function SearchBar({ basePath }: { basePath: string }) {
           {locating ? "Finding your location..." : "Use my location"}
         </Button>
         {locationName && (
-          <p className="text-sm text-zinc-600 truncate">{locationName}</p>
+          <p className="text-sm text-gray-700 truncate">{locationName}</p>
         )}
       </div>
     </div>

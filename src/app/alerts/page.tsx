@@ -37,11 +37,11 @@ export default async function AlertsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-black">Your Alerts</h1>
-          <p className="text-zinc-700">
+          <p className="text-gray-800">
             Get notified when a pediatrician opens their roster.
           </p>
           {alerts.length > 0 && (
-            <p className="text-xs text-zinc-500 mt-1">
+            <p className="text-xs text-gray-600 mt-1">
               {remaining} of {maxAlerts} alerts remaining
             </p>
           )}

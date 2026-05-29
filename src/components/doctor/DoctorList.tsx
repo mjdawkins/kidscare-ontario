@@ -25,7 +25,7 @@ export function DoctorList({ doctors }: DoctorListProps) {
   if (doctors.length === 0) {
     return (
       <div className="py-12 text-center">
-        <p className="text-zinc-500">No doctors found. Try expanding your search or adjusting filters.</p>
+        <p className="text-gray-600">No doctors found. Try expanding your search or adjusting filters.</p>
       </div>
     );
   }

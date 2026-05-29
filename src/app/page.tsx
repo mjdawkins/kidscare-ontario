@@ -12,7 +12,7 @@ export default function Home() {
             <h1 className="text-3xl font-bold tracking-tight text-black md:text-4xl">
               KidsCare Ontario
             </h1>
-            <p className="text-lg text-zinc-700 max-w-sm mx-auto">
+            <p className="text-lg text-gray-800 max-w-sm mx-auto">
               Find pediatricians, walk-in clinics, and ER wait times for your child — all in one place.
             </p>
           </div>
@@ -31,7 +31,7 @@ export default function Home() {
                 <h2 className="font-semibold text-black group-hover:text-red-700 transition-colors">
                   Urgent Care
                 </h2>
-                <p className="text-sm text-zinc-700 mt-0.5">
+                <p className="text-sm text-gray-800 mt-0.5">
                   Find walk-in clinics open now. See ER wait times. Get directions.
                 </p>
               </div>
@@ -50,7 +50,7 @@ export default function Home() {
                 <h2 className="font-semibold text-black group-hover:text-blue-700 transition-colors">
                   Find a Doctor
                 </h2>
-                <p className="text-sm text-zinc-700 mt-0.5">
+                <p className="text-sm text-gray-800 mt-0.5">
                   Search pediatricians by location. See who needs a referral. Get roster alerts.
                 </p>
               </div>

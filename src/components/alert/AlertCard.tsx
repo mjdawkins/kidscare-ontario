@@ -16,7 +16,7 @@ export function AlertCard({ alert, onDelete }: AlertCardProps) {
         <p className="font-medium">
           {alert.doctor_name ?? `Any doctor near ${alert.postal_code}`}
         </p>
-        <p className="text-sm text-zinc-500">
+        <p className="text-sm text-gray-600">
           Within {alert.radius_km}km · Created {new Date(alert.created_at).toLocaleDateString()}
         </p>
       </div>

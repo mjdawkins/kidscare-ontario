@@ -11,8 +11,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variants: Record<string, string> = {
       primary: "bg-blue-600 text-white hover:bg-blue-700 shadow-sm",
-      secondary: "border border-zinc-300 text-zinc-700 hover:bg-zinc-50 hover:border-zinc-400",
-      ghost: "text-zinc-600 hover:bg-zinc-100",
+      secondary: "border border-zinc-300 text-gray-800 hover:bg-zinc-50 hover:border-zinc-400",
+      ghost: "text-gray-700 hover:bg-zinc-100",
     };
 
     const sizes: Record<string, string> = {
