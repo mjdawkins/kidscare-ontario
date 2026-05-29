@@ -24,7 +24,7 @@ export async function sendRosterAlerts(alerts: AlertEmail[]) {
   const results = await Promise.allSettled(
     alerts.map((alert) =>
       resend.emails.send({
-        from: "KidsCare Ontario <alerts@kidscareontario.ca>",
+        from: "KidsCare Ontario <onboarding@resend.dev>",
         to: alert.to,
         subject: `${alert.doctorName} is now accepting patients`,
         html: `
