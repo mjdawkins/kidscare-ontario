@@ -4,17 +4,17 @@ interface BadgeProps {
 }
 
 const variants: Record<string, string> = {
-  green: "bg-green-50 text-green-700 ring-green-600/20",
-  amber: "bg-amber-50 text-amber-700 ring-amber-600/20",
-  red: "bg-red-50 text-red-700 ring-red-600/20",
-  neutral: "bg-zinc-50 text-zinc-600 ring-zinc-500/20",
-  blue: "bg-blue-50 text-blue-700 ring-blue-600/20",
+  green: "bg-emerald-100 text-emerald-800 ring-emerald-600/30",
+  amber: "bg-amber-100 text-amber-800 ring-amber-600/30",
+  red: "bg-rose-100 text-rose-800 ring-rose-600/30",
+  neutral: "bg-zinc-100 text-zinc-700 ring-zinc-400/20",
+  blue: "bg-blue-100 text-blue-800 ring-blue-600/30",
 };
 
 export function Badge({ variant = "neutral", children }: BadgeProps) {
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${variants[variant]}`}
+      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${variants[variant]}`}
     >
       {children}
     </span>

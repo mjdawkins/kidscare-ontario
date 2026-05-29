@@ -7,14 +7,14 @@ export function LoginButton() {
   const { user, loading, signOut } = useAuth();
 
   if (loading) {
-    return <div className="h-9 w-20 animate-pulse rounded bg-zinc-200" />;
+    return <div className="h-9 w-20 animate-pulse rounded-full bg-zinc-200" />;
   }
 
   if (user) {
     return (
       <button
         onClick={signOut}
-        className="rounded-full px-4 py-1.5 text-sm font-medium text-zinc-600 hover:bg-zinc-100"
+        className="rounded-full px-4 py-1.5 text-sm font-medium text-zinc-600 hover:bg-zinc-100 transition-colors"
       >
         Sign Out
       </button>
@@ -34,7 +34,7 @@ export function LoginButton() {
           options: { redirectTo: `${location.origin}/api/auth/callback` },
         })
       }
-      className="rounded-full bg-black px-4 py-1.5 text-sm font-medium text-white hover:bg-zinc-800"
+      className="rounded-full bg-blue-600 px-4 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-colors"
     >
       Sign In
     </button>
