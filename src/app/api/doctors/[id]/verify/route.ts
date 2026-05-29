@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { verificationSchema } from "@/lib/validation";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { rateLimit } from "@/lib/rate-limit";
 import {
   calculateAcceptingStatus,
@@ -9,6 +10,7 @@ import {
   isStale,
   staleDays,
 } from "@/lib/verification";
+import { sendRosterAlerts } from "@/lib/notifications";
 
 export async function POST(
   request: NextRequest,
@@ -107,6 +109,28 @@ export async function POST(
       alertsTriggered = matchingAlerts.length;
 
       if (matchingAlerts.length > 0) {
+        // Get user emails via Supabase admin API
+        const serviceClient = createServiceClient(
+          process.env.SUPABASE_URL!,
+          process.env.SUPABASE_SECRET_KEY!
+        );
+
+        const alertEmails: Array<{ to: string; doctorName: string; doctorId: string }> = [];
+        for (const alert of matchingAlerts) {
+          const { data } = await serviceClient.auth.admin.getUserById(alert.userId);
+          if (data.user?.email) {
+            alertEmails.push({
+              to: data.user.email,
+              doctorName: doctor.name,
+              doctorId: id,
+            });
+          }
+        }
+
+        // Send emails (non-blocking)
+        sendRosterAlerts(alertEmails);
+
+        // Mark as notified
         await prisma.alert.updateMany({
           where: { id: { in: matchingAlerts.map((a: { id: string }) => a.id) } },
           data: { lastNotifiedAt: new Date() },
