@@ -9,7 +9,7 @@ export function Card({ children, className = "", onClick }: CardProps) {
   return (
     <Component
       onClick={onClick as any}
-      className={`w-full rounded-2xl border border-zinc-200/80 bg-white p-4 text-left shadow-sm transition-all duration-150 hover:shadow-md hover:border-zinc-300 ${className}`}
+      className={`w-full rounded-2xl border border-slate-200/80 bg-white p-4 text-left shadow-sm transition-all duration-150 hover:shadow-md hover:border-slate-300 ${className}`}
     >
       {children}
     </Component>

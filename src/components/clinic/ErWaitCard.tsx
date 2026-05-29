@@ -19,7 +19,7 @@ function formatWait(minutes: number): string {
 }
 
 function waitColor(minutes: number): string {
-  if (minutes === 0) return "text-neutral-700";
+  if (minutes === 0) return "text-slate-600";
   if (minutes < 60) return "text-green-700";
   if (minutes < 120) return "text-amber-700";
   return "text-red-700";
@@ -29,11 +29,11 @@ export function ErWaitCard({ hospitalName, waitMinutes, patientsInED, patientsWa
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(hospitalName + " Hospital, Ontario")}`;
 
   return (
-    <div className={`rounded-xl border p-4 ${isLive ? "border-red-200 bg-red-50" : "border-zinc-200 bg-white"}`}>
+    <div className={`rounded-xl border p-4 ${isLive ? "border-red-200 bg-red-50" : "border-slate-200 bg-white"}`}>
       <div className="flex items-start justify-between">
         <div>
-          <h3 className="font-semibold text-neutral-900">{hospitalName}</h3>
-          <p className="text-sm text-neutral-700">{distanceKm.toFixed(1)} km away</p>
+          <h3 className="font-semibold text-slate-900">{hospitalName}</h3>
+          <p className="text-sm text-slate-600">{distanceKm.toFixed(1)} km away</p>
         </div>
         <div className="text-right">
           <p className={`text-lg font-bold ${waitColor(waitMinutes)}`}>
@@ -43,14 +43,14 @@ export function ErWaitCard({ hospitalName, waitMinutes, patientsInED, patientsWa
             {isLive && (
               <span className="text-xs font-semibold text-green-800 bg-green-100 rounded-full px-1.5 py-0.5">Live</span>
             )}
-            <p className="text-xs text-neutral-700">
+            <p className="text-xs text-slate-600">
               {isLive ? "current" : "avg wait"}
             </p>
           </div>
         </div>
       </div>
       {patientsInED > 0 && (
-        <div className="mt-2 flex items-center gap-4 text-xs text-neutral-800">
+        <div className="mt-2 flex items-center gap-4 text-xs text-slate-700">
           <span>{patientsInED} in emergency dept</span>
           {patientsWaiting > 0 && <span>{patientsWaiting} waiting</span>}
         </div>
@@ -78,15 +78,15 @@ export function ErWaitList({ erWaits }: ErWaitListProps) {
 
   return (
     <div className="space-y-3">
-      <h2 className="text-lg font-semibold text-neutral-900">ER Wait Times Near You</h2>
-      <p className="text-xs text-neutral-700">
+      <h2 className="text-lg font-semibold text-slate-900">ER Wait Times Near You</h2>
+      <p className="text-xs text-slate-600">
         Wait times are estimates. Patients are seen by priority, not first-come-first-served.
         Always call 911 in an emergency.
       </p>
       {erWaits.map((er) => (
         <ErWaitCard key={er.hospitalName} {...er} />
       ))}
-      <p className="text-xs text-neutral-700">
+      <p className="text-xs text-slate-600">
         Data: Halton Healthcare &middot; Updated every 15 min
       </p>
     </div>

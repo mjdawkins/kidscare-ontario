@@ -1,19 +1,66 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Brand */
+  --color-brand: #1d4ed8;
+  --color-brand-hover: #1e40af;
+  --color-brand-light: #dbeafe;
+
+  /* Surfaces */
+  --color-surface: #ffffff;
+  --color-surface-muted: #f8fafc;
+  --color-surface-accent: #eff6ff;
+
+  /* Text */
+  --color-text: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #64748b;
+
+  /* Borders */
+  --color-border: #e2e8f0;
+  --color-border-hover: #cbd5e1;
+
+  /* Status colors */
+  --color-success-text: #166534;
+  --color-success-bg: #dcfce7;
+  --color-warning-text: #92400e;
+  --color-warning-bg: #fef3c7;
+  --color-danger-text: #991b1b;
+  --color-danger-bg: #fee2e2;
+  --color-info-text: #1e40af;
+  --color-info-bg: #dbeafe;
+
+  /* Spacing scale (Tailwind defaults, documented here) */
+  /* 0.25rem (4px) increments: 1=4px, 2=8px, 3=12px, 4=16px, 6=24px, 8=32px */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Force light color scheme — dark text on light background always */
+html {
+  color-scheme: light;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* Typography scale */
+h1, h2, h3, h4 {
+  color: var(--color-text);
+  font-weight: 600;
+  line-height: 1.25;
+}
+h1 { font-size: 1.5rem; }
+h2 { font-size: 1.25rem; }
+h3 { font-size: 1.125rem; }
+p { color: var(--color-text-secondary); }
+small, .text-muted { color: var(--color-text-muted); font-size: 0.8125rem; }
+
+/* Utility classes using tokens */
+.text-brand { color: var(--color-brand); }
+.bg-brand { background-color: var(--color-brand); }
+.text-secondary { color: var(--color-text-secondary); }
+.text-muted { color: var(--color-text-muted); }

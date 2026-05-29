@@ -25,7 +25,7 @@ export function DoctorFilters() {
       <select
         value={activeType ?? ""}
         onChange={(e) => setParam("doctor_type", e.target.value || null)}
-        className="h-10 rounded-lg border border-zinc-300 px-3 text-sm"
+        className="h-10 rounded-lg border border-slate-300 px-3 text-sm"
       >
         <option value="">All doctor types</option>
         <option value="pediatrician_primary">Primary care pediatrician</option>
@@ -36,7 +36,7 @@ export function DoctorFilters() {
       <select
         value={activeStatus ?? ""}
         onChange={(e) => setParam("accepting_status", e.target.value || null)}
-        className="h-10 rounded-lg border border-zinc-300 px-3 text-sm"
+        className="h-10 rounded-lg border border-slate-300 px-3 text-sm"
       >
         <option value="">Any status</option>
         <option value="accepting">Accepting patients</option>
@@ -47,7 +47,7 @@ export function DoctorFilters() {
       <select
         value={activeReferral ?? ""}
         onChange={(e) => setParam("referral_required", e.target.value || null)}
-        className="h-10 rounded-lg border border-zinc-300 px-3 text-sm"
+        className="h-10 rounded-lg border border-slate-300 px-3 text-sm"
       >
         <option value="">Any referral requirement</option>
         <option value="false">No referral needed</option>

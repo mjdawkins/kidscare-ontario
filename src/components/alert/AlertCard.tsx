@@ -11,12 +11,12 @@ interface AlertCardProps {
 
 export function AlertCard({ alert, onDelete }: AlertCardProps) {
   return (
-    <div className="flex items-center justify-between rounded-xl border border-zinc-200 p-4">
+    <div className="flex items-center justify-between rounded-xl border border-slate-200 p-4">
       <div>
         <p className="font-medium">
           {alert.doctor_name ?? `Any doctor near ${alert.postal_code}`}
         </p>
-        <p className="text-sm text-neutral-600">
+        <p className="text-sm text-slate-500">
           Within {alert.radius_km}km · Created {new Date(alert.created_at).toLocaleDateString()}
         </p>
       </div>

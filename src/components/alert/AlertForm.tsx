@@ -58,7 +58,7 @@ export function AlertForm() {
       />
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-neutral-800">Radius (km)</label>
+        <label className="text-sm font-medium text-slate-700">Radius (km)</label>
         <input
           type="range"
           min={5}
@@ -68,13 +68,13 @@ export function AlertForm() {
           onChange={(e) => setRadius(parseInt(e.target.value))}
           className="w-full"
         />
-        <span className="text-sm text-neutral-600">{radius} km</span>
+        <span className="text-sm text-slate-500">{radius} km</span>
       </div>
 
       <select
         value={type}
         onChange={(e) => setType(e.target.value as typeof type)}
-        className="h-10 rounded-lg border border-zinc-300 px-3 text-sm"
+        className="h-10 rounded-lg border border-slate-300 px-3 text-sm"
       >
         <option value="">Any doctor type</option>
         <option value="pediatrician_primary">Primary care pediatrician</option>

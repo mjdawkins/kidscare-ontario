@@ -30,8 +30,8 @@ export default async function UrgentPage({
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-neutral-900">Urgent Care</h1>
-        <p className="text-neutral-800">Find walk-in clinics, ER wait times, and virtual care near you.</p>
+        <h1 className="text-2xl font-bold text-slate-900">Urgent Care</h1>
+        <p className="text-slate-700">Find walk-in clinics, ER wait times, and virtual care near you.</p>
       </div>
 
       <Suspense fallback={<div className="h-10" />}>
@@ -65,7 +65,7 @@ async function ClinicResults({ params }: { params: SearchParams }) {
 
   if (lat === null || lng === null) {
     return (
-      <p className="py-12 text-center text-neutral-700">
+      <p className="py-12 text-center text-slate-600">
         Enter a postal code or use your location to find clinics near you.
       </p>
     );
@@ -82,7 +82,7 @@ async function ClinicResults({ params }: { params: SearchParams }) {
       {clinics.length > 0 ? (
         <ClinicList clinics={clinics} />
       ) : (
-        <p className="py-12 text-center text-neutral-700">
+        <p className="py-12 text-center text-slate-600">
           No clinics found within {SEARCH_RADIUS_KM}km of your location.
           <br />
           <span className="text-xs">({lat.toFixed(4)}, {lng.toFixed(4)})</span>

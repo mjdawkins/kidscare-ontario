@@ -31,7 +31,7 @@ export function DoctorProfile({ doctor }: DoctorProfileProps) {
       <div>
         <h1 className="text-2xl font-semibold">{doctor.name}</h1>
         {doctor.specialty && (
-          <p className="text-neutral-800">{doctor.specialty}</p>
+          <p className="text-slate-700">{doctor.specialty}</p>
         )}
       </div>
 
@@ -49,7 +49,7 @@ export function DoctorProfile({ doctor }: DoctorProfileProps) {
         lastVerified={doctor.verification.last_verified}
       />
 
-      <div className="space-y-2 text-sm text-neutral-800">
+      <div className="space-y-2 text-sm text-slate-700">
         <p>{doctor.address}</p>
         {doctor.phone && <p>Phone: {doctor.phone}</p>}
         {doctor.website && (
