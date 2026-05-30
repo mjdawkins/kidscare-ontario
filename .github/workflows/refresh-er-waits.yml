@@ -2,14 +2,25 @@ name: Refresh ER Wait Times
 on:
   schedule:
     - cron: '*/15 * * * *'
-  workflow_dispatch: # Allows manual trigger from GitHub UI
+  workflow_dispatch:
 
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - name: Trigger ER wait refresh
-        run: |
-          curl -X POST https://kidscare-ontario.vercel.app/api/cron/daily \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            --fail --silent --show-error
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm ci
+
+      - run: npx playwright install chromium --with-deps
+
+      - name: Run ER wait scraper
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+        run: npx tsx scripts/refresh-er-waits.ts
