@@ -10,6 +10,7 @@ jobs:
     timeout-minutes: 10
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
     steps:
       - uses: actions/checkout@v4
 
@@ -22,6 +23,4 @@ jobs:
       - run: npx playwright install chromium --with-deps
 
       - name: Run ER wait scraper
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: npx tsx scripts/refresh-er-waits.ts
