@@ -1,4 +1,4 @@
-// CPSO Pediatrician Scraper — city-by-city, with geocoding
+// CPSO Doctor Scraper — Family Doctors + Pediatricians, city-by-city, with geocoding
 // Run quarterly: npx tsx scripts/scrape-doctors.ts
 // Upserts doctors (ON CONFLICT on cpso_id) so safe to re-run.
 
@@ -71,7 +71,7 @@ function parseDoctors(bodyText: string) {
     }
 
     if (name && cpsoId) {
-      doctors.push({ cpsoId, name, specialty: specialty || "Pediatrics", address: addressParts.join(", ") });
+      doctors.push({ cpsoId, name, specialty, address: addressParts.join(", ") });
     }
   }
   return doctors;
@@ -108,14 +108,11 @@ async function geocodeNominatim(postalCode: string): Promise<{lat: number; lng: 
 async function geocodeAddress(address: string): Promise<{lat: number; lng: number} | null> {
   const postal = extractPostalCode(address);
   if (!postal) return null;
-  // Try DB
   const pc = await prisma.postalCode.findUnique({ where: { postalCode: postal }, select: { lat: true, lng: true } });
   if (pc) return pc;
-  // FSA fallback
   const fsa = postal.slice(0, 3);
   const fsaMatch = await prisma.postalCode.findFirst({ where: { postalCode: { startsWith: fsa } }, select: { lat: true, lng: true } });
   if (fsaMatch) return fsaMatch;
-  // Nominatim
   const nm = await geocodeNominatim(postal);
   if (nm) {
     await prisma.postalCode.create({ data: { postalCode: postal, lat: nm.lat, lng: nm.lng } }).catch(() => {});
@@ -124,8 +121,23 @@ async function geocodeAddress(address: string): Promise<{lat: number; lng: numbe
 }
 
 // ---- Database ----
-async function upsertDoctor(doc: any, coords: {lat: number; lng: number}) {
-  const isSpecialist = doc.specialty !== "Pediatrics" && doc.specialty.length > 0 && !doc.specialty.toLowerCase().includes("general");
+async function upsertDoctor(doc: any, coords: {lat: number; lng: number}, doctorType: string) {
+  let referralRequired: boolean;
+  let finalSpecialty: string;
+
+  if (doctorType === "family_doctor") {
+    referralRequired = false;
+    finalSpecialty = doc.specialty || "Family Medicine";
+  } else {
+    // Pediatrician: primary vs specialist
+    const isSpecialist = doc.specialty && doc.specialty.length > 0
+      && doc.specialty !== "Pediatrics"
+      && !doc.specialty.toLowerCase().includes("general");
+    referralRequired = isSpecialist;
+    finalSpecialty = doc.specialty || "Pediatrics";
+    doctorType = isSpecialist ? "pediatrician_specialist" : "pediatrician_primary";
+  }
+
   try {
     await prisma.$executeRawUnsafe(
       `INSERT INTO doctors (id, cpso_id, name, specialty, doctor_type, referral_required, accepting_status, languages, address, coords, source, created_at, updated_at)
@@ -134,13 +146,72 @@ async function upsertDoctor(doc: any, coords: {lat: number; lng: number}) {
          name = EXCLUDED.name, specialty = EXCLUDED.specialty,
          doctor_type = EXCLUDED.doctor_type, address = EXCLUDED.address,
          coords = EXCLUDED.coords, updated_at = now()`,
-      doc.cpsoId, doc.name, doc.specialty || "Pediatrics",
-      isSpecialist ? "pediatrician_specialist" : "pediatrician_primary",
-      isSpecialist, doc.address, coords.lng, coords.lat
+      doc.cpsoId, doc.name, finalSpecialty,
+      doctorType, referralRequired, doc.address, coords.lng, coords.lat
     );
     return true;
   } catch {
     return false;
+  }
+}
+
+// ---- Search helper ----
+type SearchMode = "Family Doctor" | "Specialist";
+
+async function searchCity(
+  page: any,
+  city: string,
+  mode: SearchMode
+): Promise<{ doctors: any[]; skipped: boolean; error?: string }> {
+  try {
+    await page.goto("https://register.cpso.on.ca/Advanced-Search/", {
+      waitUntil: "networkidle", timeout: 20000,
+    });
+    await page.waitForTimeout(400);
+
+    // Select radio
+    const radio = page.locator(`input[value="${mode}"]`);
+    if ((await radio.count()) > 0) {
+      await radio.first().click();
+      await page.waitForTimeout(200);
+    }
+
+    // Specialist mode: select Pediatrics
+    if (mode === "Specialist") {
+      await page.locator('select#specialistType').selectOption({ label: "Pediatrics" });
+    }
+
+    // Select city
+    await page.locator('select#cityDropDown').selectOption({ label: city }).catch(() => {});
+
+    // Submit
+    await page.locator("button.search-button").click({ timeout: 8000 }).catch(() => {});
+    await page.waitForTimeout(4000);
+
+    const bodyText = await page.locator("body").innerText();
+
+    if (bodyText.includes("more than 100 results")) {
+      return { doctors: [], skipped: true };
+    }
+
+    const pageMatch = bodyText.match(/Showing\s+\d+\s+of\s+(\d+)\s+pages?/);
+    const totalPages = pageMatch ? parseInt(pageMatch[1]) : 1;
+
+    const allDocs: any[] = [];
+    for (let p = 1; p <= totalPages; p++) {
+      if (p > 1) {
+        await page.locator(`text="${p}"`).first().click({ timeout: 3000 }).catch(() => {});
+        await page.waitForTimeout(1500);
+      }
+      const text = await page.locator("body").innerText();
+      for (const d of parseDoctors(text)) {
+        if (!allDocs.some((x: any) => x.cpsoId === d.cpsoId)) allDocs.push(d);
+      }
+    }
+
+    return { doctors: allDocs, skipped: false };
+  } catch (e: any) {
+    return { doctors: [], skipped: false, error: e.message?.slice(0, 80) ?? String(e) };
   }
 }
 
@@ -161,80 +232,71 @@ async function main() {
     const page = await context.newPage();
 
     for (const city of CITIES) {
-      process.stdout.write(`${city}: `);
-      let found = 0;
-      let geocoded = 0;
+      // ---- Family Doctor pass ----
+      process.stdout.write(`${city} [family]: `);
+      const famResult = await searchCity(page, city, "Family Doctor");
 
-      try {
-        // Always start from a clean search page
-        await page.goto("https://register.cpso.on.ca/Advanced-Search/", {
-          waitUntil: "networkidle", timeout: 20000,
-        });
-        await page.waitForTimeout(400);
-
-        // Fill form
-        const specialistRadio = page.locator('input[value="Specialist"]');
-        if (await specialistRadio.count() > 0) {
-          await specialistRadio.first().click();
-          await page.waitForTimeout(200);
-        }
-        await page.locator('select#specialistType').selectOption({ label: "Pediatrics" });
-        await page.locator('select#cityDropDown').selectOption({ label: city }).catch(() => {});
-
-        // Submit
-        await page.locator("button.search-button").click({ timeout: 8000 }).catch(() => {});
-        await page.waitForTimeout(4000);
-
-        const bodyText = await page.locator("body").innerText();
-
-        if (bodyText.includes("more than 100 results")) {
-          console.log(">100 skipped");
-          await new Promise(r => setTimeout(r, 1000));
-          continue;
-        }
-
-        const pageMatch = bodyText.match(/Showing\s+\d+\s+of\s+(\d+)\s+pages?/);
-        const totalPages = pageMatch ? parseInt(pageMatch[1]) : 1;
-
-        // Collect all pages
-        const allDocs: any[] = [];
-        for (let p = 1; p <= totalPages; p++) {
-          if (p > 1) {
-            await page.locator(`text="${p}"`).first().click({ timeout: 3000 }).catch(() => {});
-            await page.waitForTimeout(1500);
-          }
-          const text = await page.locator("body").innerText();
-          for (const d of parseDoctors(text)) {
-            if (!allDocs.some((x: any) => x.cpsoId === d.cpsoId)) allDocs.push(d);
-          }
-        }
-
-        found = allDocs.length;
-
-        // Upsert with geocoding
-        for (const doc of allDocs) {
+      if (famResult.error) {
+        console.log(`ERR: ${famResult.error}`);
+        errors.push(`${city} family: ${famResult.error}`);
+      } else if (famResult.skipped) {
+        console.log(">100 skipped");
+      } else {
+        let found = 0;
+        let geocoded = 0;
+        for (const doc of famResult.doctors) {
           if (!doc.address) continue;
           const coords = await geocodeAddress(doc.address);
           if (!coords) continue;
-          const ok = await upsertDoctor(doc, coords);
+          const ok = await upsertDoctor(doc, coords, "family_doctor");
           if (ok) geocoded++;
         }
-
+        found = famResult.doctors.length;
         totalFound += found;
         totalGeocoded += geocoded;
         console.log(`${geocoded}/${found}`);
-
-      } catch (e: any) {
-        const msg = e.message?.slice(0, 80) ?? String(e);
-        console.log(`ERR: ${msg}`);
-        errors.push(`${city}: ${msg}`);
       }
 
-      // Respectful delay between cities
+      await new Promise(r => setTimeout(r, 800));
+
+      // ---- Specialist (Pediatrics) pass ----
+      process.stdout.write(`${city} [peds]:  `);
+      const specResult = await searchCity(page, city, "Specialist");
+
+      if (specResult.error) {
+        console.log(`ERR: ${specResult.error}`);
+        errors.push(`${city} peds: ${specResult.error}`);
+      } else if (specResult.skipped) {
+        console.log(">100 skipped");
+      } else {
+        let found = 0;
+        let geocoded = 0;
+        for (const doc of specResult.doctors) {
+          if (!doc.address) continue;
+          const coords = await geocodeAddress(doc.address);
+          if (!coords) continue;
+          // Default to pediatrician_primary — upsertDoctor refines to specialist if needed
+          const ok = await upsertDoctor(doc, coords, "pediatrician_primary");
+          if (ok) geocoded++;
+        }
+        found = specResult.doctors.length;
+        totalFound += found;
+        totalGeocoded += geocoded;
+        console.log(`${geocoded}/${found}`);
+      }
+
       await new Promise(r => setTimeout(r, 1200));
     }
 
-    console.log(`\nFound: ${totalFound}, Geocoded/inserted: ${totalGeocoded}, DB total: ${await prisma.doctor.count()}`);
+    const dbTotal = await prisma.doctor.count();
+    const byType = await prisma.$queryRawUnsafe<Array<{doctor_type: string; count: bigint}>>(
+      "SELECT doctor_type, COUNT(*) as count FROM doctors GROUP BY doctor_type ORDER BY count DESC"
+    );
+    console.log(`\nFound: ${totalFound}, Geocoded/inserted: ${totalGeocoded}, DB total: ${dbTotal}`);
+    console.log("By type:");
+    for (const row of byType) {
+      console.log(`  ${row.doctor_type}: ${row.count}`);
+    }
     if (errors.length > 0) console.log(`Errors: ${errors.length} cities`);
   } finally {
     await browser.close();
