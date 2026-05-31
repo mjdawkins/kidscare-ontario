@@ -1,6 +1,5 @@
 "use client";
 
-import { createBrowserClient } from "@supabase/ssr";
 import { useAuth } from "./AuthProvider";
 
 export function LoginButton() {
@@ -21,22 +20,12 @@ export function LoginButton() {
     );
   }
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
-  );
-
   return (
-    <button
-      onClick={() =>
-        supabase.auth.signInWithOAuth({
-          provider: "google",
-          options: { redirectTo: `${location.origin}/api/auth/callback` },
-        })
-      }
-      className="rounded-full bg-blue-600 px-4 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-colors"
+    <a
+      href="/auth"
+      className="rounded-full bg-blue-700 px-4 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-800 transition-colors"
     >
       Sign In
-    </button>
+    </a>
   );
 }
